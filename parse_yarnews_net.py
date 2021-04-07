@@ -40,7 +40,7 @@ class YarnewsNetParser(NewsSiteParser):
         news = []
         for item in items:
             title = item.find('a', class_='news-name').get_text()
-            link = "https://www.yarnews.net" + item.find('a', class_='news-name').get('href')
+            link = self.extract_article_url(article_tag)
             full_text = self.retrieve_article_text(link) # Действие
             date_time = datetime.strptime(item.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M")
             print(f'{date_time.strftime("%H:%M:%S, %Y-%m-%d")} | {title}', file=sys.stderr) # Действие
@@ -58,6 +58,9 @@ class YarnewsNetParser(NewsSiteParser):
                 return news, False
         return news, True
 
+    def extract_article_url(self, article_tag) -> str:  # Вычисление
+        return "https://www.yarnews.net" + article_tag.find('a', class_='news-name').get('href')
+
     def parse(self, earliest_date: datetime) -> list: # Действие
         """
         Обработка данных новостей взятых с сайта "YarNews".
@@ -71,9 +74,12 @@ class YarnewsNetParser(NewsSiteParser):
         news_loaded = 0
         more_news_exists = True
         while more_news_exists:
-            request = super().get_html('https://www.yarnews.net/news/chronicle/ajax/' + str(news_loaded) + '/') # Действие
+            request = super().get_html(self.generate_articles_url(news_loaded)) # Действие
             items = request.find_all('div', class_="news-feed-info")
             news_from_parser, more_news_exists = self.parse_news_items(items, earliest_date) # Действие
             news = news + news_from_parser
             news_loaded += 30
         return news
+
+    def generate_articles_url(self, loaded) -> str:  # Вычисление
+        return 'https://www.yarnews.net/news/chronicle/ajax/' + str(loaded) + '/'
