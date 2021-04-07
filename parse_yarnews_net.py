@@ -41,11 +41,14 @@ class YarnewsNetParser(NewsSiteParser):
         for item in items:            
             article = self.parse_article(item)  # Действие
             self.log_article_parsed_msg(article)
-            if article['date_time'] > earliest_date:
+            if self.article_is_suitable(article, earliest_date):
                 news.append(article)
             else:
                 return news, False
         return news, True
+
+    def article_is_suitable(self, article, earliest_date) -> bool:
+        return article['date_time'] > earliest_date
 
     def parse_article(self, article_tag) -> dict: # Действие
         title = article_tag.find('a', class_='news-name').get_text()
