@@ -10,7 +10,7 @@ class YarnewsNetParser(NewsSiteParser):
     Класс парсера разбирающего сайт https://www.yarnews.net/
     """
 
-    def retrieve_article_text(self, link: str) -> str: # Действие
+    def retrieve_article_text(self, article_body: Tag) -> str: # Вычисление
         """
         Получение статьи и выделение из неё нужного текста.
 
@@ -20,11 +20,11 @@ class YarnewsNetParser(NewsSiteParser):
         :return: строка с текстом статьи
         """
         full_text = ''
-        text_parts = super().get_html(link).find('div', class_="text").find_all('p') # Действие
+        text_parts = article_body.find('div', class_="text").find_all('p')
         for part in text_parts:
             part = part.get_text()
             strong_tag = str(re.search(r'<.strong>', part))
-            full_text = full_text + part.replace(strong_tag, ' ').strip() + '\n' # Действие
+            full_text = full_text + part.replace(strong_tag, ' ').strip() + '\n'
         return full_text
 
     def parse_news_items(self, items: list, earliest_date: str) -> list: # Действие
@@ -50,7 +50,8 @@ class YarnewsNetParser(NewsSiteParser):
     def parse_article(self, article_tag) -> dict: # Действие
         title = article_tag.find('a', class_='news-name').get_text()
         link = self.extract_article_url(article_tag)
-        full_text = self.retrieve_article_text(link) # Действие
+        article_body =  super().get_html(link) # Действие
+        full_text = self.retrieve_article_text(article_body)
         date_time = datetime.strptime(article_tag.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M") # Действие
         categories = list()
         return {
