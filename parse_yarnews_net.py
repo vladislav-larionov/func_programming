@@ -54,6 +54,9 @@ class YarnewsNetParser(NewsSiteParser):
         full_text = self.retrieve_article_text(article_body)
         date_time = datetime.strptime(article_tag.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M") # Действие
         categories = list()
+        return self.create_article(title, link, full_text, date_time, categories)
+
+    def create_article(self, title, link, full_text, date_time, categories) -> dict:  # Вычисление
         return {
             'title': title,
             'link': link,
