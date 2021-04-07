@@ -38,25 +38,32 @@ class YarnewsNetParser(NewsSiteParser):
         :return: список из словарей с разобранными новостями
         """
         news = []
-        for item in items:
-            title = item.find('a', class_='news-name').get_text()
-            link = self.extract_article_url(article_tag)
-            full_text = self.retrieve_article_text(link) # Действие
-            date_time = datetime.strptime(item.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M")
-            print(f'{date_time.strftime("%H:%M:%S, %Y-%m-%d")} | {title}', file=sys.stderr) # Действие
-            categories = list()
-            if date_time > earliest_date:
-                news.append({
-                    'title': title,
-                    'link': link,
-                    'full_text': full_text,
-                    'date_time': date_time,
-                    'categories': categories,
-                    'source': 'YarNews'
-                })
+        for item in items:            
+            article = self.parse_article(item)  # Действие
+            self.log_article_parsed_msg(article)
+            if article['date_time'] > earliest_date:
+                news.append(article)
             else:
                 return news, False
         return news, True
+
+    def parse_article(self, article_tag) -> dict: # Действие
+        title = article_tag.find('a', class_='news-name').get_text()
+        link = self.extract_article_url(article_tag)
+        full_text = self.retrieve_article_text(link) # Действие
+        date_time = datetime.strptime(article_tag.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M") # Действие
+        categories = list()
+        return {
+            'title': title,
+            'link': link,
+            'full_text': full_text,
+            'date_time': date_time,
+            'categories': categories,
+            'source': 'YarNews'
+        }
+
+    def log_article_parsed_msg(self, article): # Действие
+        print(f'{date_time.strftime("%H:%M:%S, %Y-%m-%d")} | {article['title']}', file=sys.stderr) # Действие
 
     def extract_article_url(self, article_tag) -> str:  # Вычисление
         return "https://www.yarnews.net" + article_tag.find('a', class_='news-name').get('href')
