@@ -44,7 +44,7 @@ class YarnewsNetParser(NewsSiteParser):
                 return news, False
         return news, True
 
-    def article_is_suitable(self, article, earliest_date) -> bool:
+    def article_is_suitable(self, article, earliest_date) -> bool:  # Вычисление
         return article['date_time'] > earliest_date
 
     def parse_article(self, article_tag) -> dict: # Действие
@@ -52,7 +52,7 @@ class YarnewsNetParser(NewsSiteParser):
         link = self.extract_article_url(article_tag)
         article_body =  super().get_html(link) # Действие
         full_text = self.retrieve_article_text(article_body)
-        date_time = datetime.strptime(article_tag.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M") # Действие
+        date_time = datetime.strptime(article_tag.find('span', class_="news-date").get_text(), "%d.%m.%Y в %H:%M")
         categories = list()
         return self.create_article(title, link, full_text, date_time, categories)
 
